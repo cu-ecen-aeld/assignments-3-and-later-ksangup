@@ -15,13 +15,17 @@ struct thread_data{
      * your thread implementation.
      */
 
+    int wait_to_obtain_ms;
+    int wait_to_release_ms;
+    pthread_t *thread;
+    pthread_mutex_t *mutex;
+
     /**
      * Set to true if the thread completed with success, false
      * if an error occurred.
      */
     bool thread_complete_success;
 };
-
 
 /**
 * Start a thread which sleeps @param wait_to_obtain_ms number of milliseconds, then obtains the

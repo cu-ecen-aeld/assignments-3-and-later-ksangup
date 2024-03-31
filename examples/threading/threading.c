@@ -7,6 +7,8 @@
 #define DEBUG_LOG(msg,...)
 //#define DEBUG_LOG(msg,...) printf("threading: " msg "\n" , ##__VA_ARGS__)
 #define ERROR_LOG(msg,...) printf("threading ERROR: " msg "\n" , ##__VA_ARGS__)
+#define delay_ms(time_ms)	usleep(time_ms * 1000)
+
 
 void* threadfunc(void* thread_param)
 {
@@ -14,6 +16,19 @@ void* threadfunc(void* thread_param)
     // TODO: wait, obtain mutex, wait, release mutex as described by thread_data structure
     // hint: use a cast like the one below to obtain thread arguments from your parameter
     //struct thread_data* thread_func_args = (struct thread_data *) thread_param;
+    
+    struct thread_data *thread_data_p = (struct thread_data*)thread_param;
+	
+    //DEBUG_LOG(" delay_ms %d", thread_data_p->wait_to_obtain_ms);
+	//delay_ms(thread_data_p->wait_to_obtain_ms);
+    DEBUG_LOG(" Get mutex lock");
+	pthread_mutex_lock(thread_data_p->mutex);
+    DEBUG_LOG(" delay_ms %d", thread_data_p->wait_to_obtain_ms);
+	delay_ms(thread_data_p->wait_to_release_ms);
+	pthread_mutex_unlock(thread_data_p->mutex);
+    DEBUG_LOG(" Get mutex unlock");
+	thread_data_p->thread_complete_success = true;
+
     return thread_param;
 }
 
@@ -28,6 +43,23 @@ bool start_thread_obtaining_mutex(pthread_t *thread, pthread_mutex_t *mutex,int 
      *
      * See implementation details in threading.h file comment block
      */
-    return false;
+
+    int retVal = 0;
+    struct thread_data *SThread = (struct thread_data *) malloc(sizeof(struct thread_data));
+    SThread->thread = thread;
+    SThread->mutex = mutex;
+    SThread->wait_to_obtain_ms = wait_to_obtain_ms;
+    SThread->wait_to_release_ms = wait_to_release_ms;
+
+    retVal = pthread_create(SThread->thread, NULL, threadfunc, (void*)SThread);
+    DEBUG_LOG("Created Thread: %d\n", retVal);
+
+	if (retVal != 0)
+    {
+		ERROR_LOG("Thread was not created!");
+		return false;
+	}
+
+    return true;
 }
 
