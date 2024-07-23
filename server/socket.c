@@ -18,8 +18,6 @@ FILE *file;
 void signal_handler(int signal){
     if(signal == SIGINT || signal == SIGTERM || signal == SIGKILL) 
     {
-        printf("Caught signal SIGINT!\n");
-        printf("Terminating...\n");
         close(socketFD);
         close(peerSocketFD);			
         remove("/var/tmp/aesdsocketdata");
@@ -51,7 +49,8 @@ int initiate_connection(void)
     }
 
 
-    if(bind(socketFD, servinfo->ai_addr, sizeof(struct addrinfo)) != 0){
+    if(bind(socketFD, servinfo->ai_addr, sizeof(struct addrinfo)) != 0)
+    {
         perror("bind");
         freeaddrinfo(servinfo);
         return -1;
@@ -77,7 +76,7 @@ void receive_data(void){
     if(peerSocketFD == -1){
         perror("accept");
     }
-    printf("Accepted connection from %u:%u:%u:%u\n", peeradd.sa_data[2], peeradd.sa_data[3], peeradd.sa_data[4], peeradd.sa_data[5]);
+    //printf("Accepted connection from %u:%u:%u:%u\n", peeradd.sa_data[2], peeradd.sa_data[3], peeradd.sa_data[4], peeradd.sa_data[5]);
     syslog(LOG_PRIO(LOG_DEBUG), "Accepted connection from %u:%u:%u:%u\n", peeradd.sa_data[2], peeradd.sa_data[3], peeradd.sa_data[4], peeradd.sa_data[5]);
     int index = 0;
     int buffer_len = 0;
